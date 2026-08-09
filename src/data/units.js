@@ -3,6 +3,8 @@
 // 각 레벨 내부는 주제별 유닛(코멘트)으로 구분되어 있으며, 실제로는 하나의 단어 목록으로 합쳐져
 // 30단어씩 자동으로 회차가 나뉩니다.
 
+import { SENTENCES } from './sentences';
+
 function w(hanzi, pinyin, meaning) {
   return { hanzi, pinyin, meaning };
 }
@@ -560,6 +562,13 @@ export const LEVELS = [
       w('热情', 'rè qíng', '열정적이다'),
       w('骑', 'qí', '(동물·자전거를) 타다'),
     ],
+  },
+  {
+    id: 4,
+    name: '첫 회화 문장',
+    sub: '인사, 자기소개, 감사 표현 16문장',
+    emoji: '\u{1F4AC}',
+    words: SENTENCES,
   },
 ];
 
