@@ -1,4 +1,4 @@
-export default function TopBar({ title, onBack, exp, streak }) {
+export default function TopBar({ title, onBack, onReset }) {
   return (
     <header className="topbar">
       <div className="topbar-left">
@@ -7,17 +7,19 @@ export default function TopBar({ title, onBack, exp, streak }) {
             {'\u{2190}'}
           </button>
         ) : (
-          <span className="brand">{'\u{1F331}'}</span>
+          <span className="brand">{'\u{1F1E8}\u{1F1F3}'}</span>
         )}
         <h1>{title}</h1>
       </div>
-      {(exp !== undefined || streak !== undefined) && (
-        <div className="topbar-stats">
-          {streak !== undefined && (
-            <span className="stat-chip streak-chip">{'\u{1F525}'} {streak}</span>
-          )}
-          {exp !== undefined && <span className="stat-chip exp-chip">EXP {exp}</span>}
-        </div>
+      {onReset && (
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={onReset}
+          title="이 레벨 처음부터 다시 시작"
+        >
+          {'↺'}
+        </button>
       )}
     </header>
   );
