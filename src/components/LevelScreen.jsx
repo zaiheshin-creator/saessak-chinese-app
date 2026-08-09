@@ -1,7 +1,15 @@
-export default function LevelScreen({ levels, summaries, onSelect, onReview }) {
+export default function LevelScreen({ levels, summaries, dueCount, onSelect, onReview }) {
   return (
     <section className="card level-screen">
       <p className="level-intro">레벨을 선택해서 학습을 시작하세요</p>
+
+      {dueCount > 0 && (
+        <button type="button" className="review-due-card" onClick={onReview}>
+          <span className="review-due-emoji">{'\u{1F4CC}'}</span>
+          <span className="review-due-text">오늘 복습할 단어 ({dueCount})</span>
+        </button>
+      )}
+
       <div className="level-list">
         {levels.map((lv) => {
           const s = summaries[lv.id];
@@ -17,18 +25,6 @@ export default function LevelScreen({ levels, summaries, onSelect, onReview }) {
                 <div className="level-progress-bar">
                   <div className="level-progress-fill" style={{ width: `${pct}%` }} />
                 </div>
-                {s.wrongCount > 0 && (
-                  <button
-                    type="button"
-                    className="wrong-note-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReview(lv.id);
-                    }}
-                  >
-                    오답노트 ({s.wrongCount})
-                  </button>
-                )}
               </div>
             </div>
           );

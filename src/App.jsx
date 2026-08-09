@@ -16,6 +16,7 @@ import {
 import { shuffle } from './lib/random';
 import { speakChinese, isTtsSupported, hasChineseVoice, onVoiceChange } from './lib/tts';
 import { findToneTrapIndex } from './lib/toneTrap';
+import { recordWrongWord, recordReviewCorrect, getDueItems, getDueCount } from './lib/srsQueue';
 
 function pickChoiceIdxs(pool, correctIdx) {
   const options = new Set([correctIdx]);
@@ -33,10 +34,9 @@ function computeSummaries() {
     const pool = poolForLevel(lv.id);
     const saved = loadState(lv.id, pool.length);
     const mastered = saved ? totalMasteredFor(saved) : 0;
-    const wrongCount = saved ? saved.wrongEver.length : 0;
     const totalRounds = totalRoundsFor(pool.length);
     const roundNo = saved ? Math.min(saved.currentRoundIndex + 1, totalRounds) : 1;
-    out[lv.id] = { mastered, total: pool.length, wrongCount, roundNo, totalRounds };
+    out[lv.id] = { mastered, total: pool.length, roundNo, totalRounds };
   });
   return out;
 }
@@ -60,6 +60,7 @@ export default function App() {
   const roundClearRef = useRef(false);
 
   const [ttsOk, setTtsOk] = useState(isTtsSupported() && hasChineseVoice());
+  const [dueCount, setDueCount] = useState(getDueCount());
 
   useEffect(() => {
     const off = onVoiceChange(() => setTtsOk(isTtsSupported() && hasChineseVoice()));
@@ -69,20 +70,24 @@ export default function App() {
   function goLevelScreen() {
     screenRef.current = 'level';
     reviewModeRef.current = false;
+    setDueCount(getDueCount());
     rerender();
   }
 
   function loadQuestion() {
     roundClearRef.current = false;
-    const pool = poolRef.current;
 
     if (reviewModeRef.current) {
       if (reviewQueueRef.current.length === 0) {
         screenRef.current = 'done';
+        setDueCount(getDueCount());
         rerender();
         return;
       }
-      currentRef.current = reviewQueueRef.current[0];
+      const item = reviewQueueRef.current[0];
+      poolRef.current = poolForLevel(item.levelId);
+      levelIdRef.current = item.levelId;
+      currentRef.current = item.idx;
     } else {
       const st = stateRef.current;
       if (st.roundQueue.length === 0) {
@@ -92,6 +97,7 @@ export default function App() {
       currentRef.current = st.roundQueue[0];
     }
 
+    const pool = poolRef.current;
     choiceIdxsRef.current = pickChoiceIdxs(pool, currentRef.current);
     lockedRef.current = false;
     hintUsedRef.current = false;
@@ -132,14 +138,11 @@ export default function App() {
     loadQuestion();
   }
 
-  function startReview(levelId) {
-    const pool = poolForLevel(levelId);
-    levelIdRef.current = levelId;
-    poolRef.current = pool;
-    stateRef.current = loadState(levelId, pool.length) || newState(pool.length);
-    if (!stateRef.current.wrongEver.length) return;
+  function startReview() {
+    const due = getDueItems();
+    if (!due.length) return;
     reviewModeRef.current = true;
-    reviewQueueRef.current = shuffle([...stateRef.current.wrongEver]);
+    reviewQueueRef.current = shuffle(due.map((e) => ({ levelId: e.levelId, idx: e.idx })));
     reviewTotalRef.current = reviewQueueRef.current.length;
     screenRef.current = 'quiz';
     loadQuestion();
@@ -156,10 +159,9 @@ export default function App() {
     if (isCorrect) {
       feedbackRef.current = { type: 'correct', selected: selectedIdx, text: '정답이에요! \u{1F389}' };
       if (reviewModeRef.current) {
+        const item = reviewQueueRef.current[0];
         reviewQueueRef.current = reviewQueueRef.current.slice(1);
-        const st = stateRef.current;
-        st.wrongEver = st.wrongEver.filter((i) => i !== correctIdx);
-        saveState(levelIdRef.current, st);
+        recordReviewCorrect(item.levelId, item.idx);
       } else {
         const st = stateRef.current;
         st.roundQueue = st.roundQueue.slice(1);
@@ -173,14 +175,16 @@ export default function App() {
         text: `틀렸어요. 정답: ${pool[correctIdx].meaning}`,
       };
       if (reviewModeRef.current) {
+        const item = reviewQueueRef.current[0];
+        recordWrongWord(item.levelId, item.idx);
         const q = reviewQueueRef.current.slice(1);
         const reinsertAt = Math.min(q.length, 3 + Math.floor(Math.random() * 5));
-        q.splice(reinsertAt, 0, correctIdx);
+        q.splice(reinsertAt, 0, item);
         reviewQueueRef.current = q;
       } else {
         const st = stateRef.current;
         st.mistakeCount += 1;
-        if (!st.wrongEver.includes(correctIdx)) st.wrongEver = [...st.wrongEver, correctIdx];
+        recordWrongWord(levelIdRef.current, correctIdx);
         const q = st.roundQueue.slice(1);
         const reinsertAt = Math.min(q.length, 3 + Math.floor(Math.random() * 5));
         q.splice(reinsertAt, 0, correctIdx);
@@ -220,20 +224,21 @@ export default function App() {
   const levelId = levelIdRef.current;
   const level = levelId ? getLevel(levelId) : null;
 
-  const title = screen === 'level' ? '새싹중국어' : level?.name || '새싹중국어';
+  const title =
+    screen === 'level' ? '새싹중국어' : reviewModeRef.current ? '오늘의 복습' : level?.name || '새싹중국어';
   const showBack = screen !== 'level';
   const showReset = screen === 'quiz' && !reviewModeRef.current;
 
   let roundLabel = '';
   let progressCurrent = 0;
   let progressTotal = 0;
-  if (screen === 'quiz' && stateRef.current) {
+  if (screen === 'quiz') {
     if (reviewModeRef.current) {
       const done = reviewTotalRef.current - reviewQueueRef.current.length;
-      roundLabel = '\u{1F4DD} 오답노트 복습';
+      roundLabel = '\u{1F4CC} 오늘의 복습';
       progressCurrent = done;
       progressTotal = reviewTotalRef.current;
-    } else {
+    } else if (stateRef.current) {
       const st = stateRef.current;
       const totalRounds = totalRoundsFor(poolRef.current.length);
       const roundSize = roundWords(st.order, st.currentRoundIndex).length;
@@ -262,6 +267,7 @@ export default function App() {
         <LevelScreen
           levels={LEVELS}
           summaries={computeSummaries()}
+          dueCount={dueCount}
           onSelect={startLevel}
           onReview={startReview}
         />
@@ -292,7 +298,7 @@ export default function App() {
         <DoneScreen
           title={
             reviewModeRef.current
-              ? '오답노트를 모두 복습했어요!'
+              ? '오늘의 복습을 모두 마쳤어요!'
               : `${level?.name || '이 레벨'} 단어를 모두 마스터했어요!`
           }
           stats={

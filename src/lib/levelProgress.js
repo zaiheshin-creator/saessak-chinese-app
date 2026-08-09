@@ -28,7 +28,6 @@ export function loadState(levelId, poolLength) {
         Array.isArray(parsed.order) &&
         parsed.order.length === poolLength &&
         Array.isArray(parsed.roundQueue) &&
-        Array.isArray(parsed.wrongEver) &&
         typeof parsed.currentRoundIndex === 'number'
       ) {
         return parsed;
@@ -48,7 +47,6 @@ export function newState(poolLength) {
     roundQueue: shuffle([...roundWords(order, 0)]),
     roundMasteredCount: 0,
     mistakeCount: 0,
-    wrongEver: [],
   };
 }
 
