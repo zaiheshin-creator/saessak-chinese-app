@@ -1,3 +1,5 @@
+import { analyzePinyin } from '../lib/pinyin';
+
 export default function QuizScreen({
   roundLabel,
   progressCurrent,
@@ -39,7 +41,13 @@ export default function QuizScreen({
               className={`word-area${!ttsOk ? ' no-audio' : ''}`}
               onClick={ttsOk ? onWordClick : undefined}
             >
-              <div className="word-text">{hanzi}</div>
+              <div
+                className={`word-text${
+                  locked && feedback?.type === 'correct' ? ' word-text-correct' : ''
+                }`}
+              >
+                {hanzi}
+              </div>
               {ttsOk ? (
                 <div className="hint">{'\u{1F446}'} 한자를 클릭하면 발음을 들려줘요</div>
               ) : (
@@ -59,7 +67,17 @@ export default function QuizScreen({
               <button type="button" className="hint-btn" disabled={hintUsed} onClick={onHint}>
                 {'\u{1F4A1}'} 병음 힌트
               </button>
-              {hintUsed && <div className="hint-text">병음: {pinyin}</div>}
+              {hintUsed && (
+                <div className="hint-text">
+                  병음:{' '}
+                  {analyzePinyin(pinyin).map((syl, i) => (
+                    <span key={i} className={`pinyin-tone-${syl.tone}`}>
+                      {syl.text}
+                      {i < analyzePinyin(pinyin).length - 1 ? ' ' : ''}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="choices">

@@ -15,9 +15,12 @@ import {
 } from './lib/levelProgress';
 import { shuffle } from './lib/random';
 import { speakChinese, isTtsSupported, hasChineseVoice, onVoiceChange } from './lib/tts';
+import { findToneTrapIndex } from './lib/toneTrap';
 
 function pickChoiceIdxs(pool, correctIdx) {
   const options = new Set([correctIdx]);
+  const toneTrapIdx = findToneTrapIndex(pool, correctIdx);
+  if (toneTrapIdx !== null) options.add(toneTrapIdx);
   while (options.size < 4 && options.size < pool.length) {
     options.add(Math.floor(Math.random() * pool.length));
   }

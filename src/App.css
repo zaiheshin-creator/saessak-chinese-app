@@ -15,6 +15,8 @@
   --sun-tint: #fff3da;
   --green: #3fae68;
   --green-tint: #e4f5ea;
+  --tangerine: #e58a1a;
+  --sprout: #2e8b2e;
 }
 
 .app {
@@ -247,6 +249,28 @@
   transform: scale(0.96);
 }
 
+.word-text-correct {
+  animation: word-correct-pop 0.6s ease;
+}
+
+@keyframes word-correct-pop {
+  0% {
+    transform: scale(1);
+    color: var(--ink);
+  }
+  30% {
+    transform: scale(1.18);
+    color: var(--sprout);
+  }
+  55% {
+    transform: scale(0.96);
+  }
+  100% {
+    transform: scale(1);
+    color: var(--ink);
+  }
+}
+
 .hint {
   margin-top: 10px;
   font-size: 13px;
@@ -304,6 +328,22 @@
   font-size: 14px;
   color: #9a7b1f;
   font-weight: 700;
+}
+
+.pinyin-tone-1 {
+  color: var(--berry-deep);
+}
+.pinyin-tone-2 {
+  color: var(--tangerine);
+}
+.pinyin-tone-3 {
+  color: var(--sprout);
+}
+.pinyin-tone-4 {
+  color: #2f6da0;
+}
+.pinyin-tone-0 {
+  color: var(--ink-faint);
 }
 
 .choices {
