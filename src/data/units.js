@@ -3,7 +3,17 @@
 // 각 레벨 내부는 주제별 유닛(코멘트)으로 구분되어 있으며, 실제로는 하나의 단어 목록으로 합쳐져
 // 30단어씩 자동으로 회차가 나뉩니다.
 
-import { SENTENCES } from './sentences';
+import {
+  SENTENCES,
+  TIME_SENTENCES,
+  SHOPPING_SENTENCES,
+  RESTAURANT_SENTENCES,
+  DIRECTIONS_SENTENCES,
+  WEATHER_SENTENCES,
+  HOBBY_SENTENCES,
+  SCHOOL_SENTENCES,
+  FAMILY_SENTENCES,
+} from './sentences';
 
 function w(hanzi, pinyin, meaning) {
   return { hanzi, pinyin, meaning };
@@ -569,6 +579,62 @@ export const LEVELS = [
     sub: '인사, 자기소개, 감사 표현 16문장',
     emoji: '\u{1F4AC}',
     words: SENTENCES,
+  },
+  {
+    id: 5,
+    name: '시간·날짜 회화',
+    sub: '몇 시예요, 무슨 요일이에요 등 12문장',
+    emoji: '\u{1F550}',
+    words: TIME_SENTENCES,
+  },
+  {
+    id: 6,
+    name: '쇼핑 회화',
+    sub: '이거 얼마예요, 너무 비싸요 등 12문장',
+    emoji: '\u{1F6CD}\u{FE0F}',
+    words: SHOPPING_SENTENCES,
+  },
+  {
+    id: 7,
+    name: '식당 회화',
+    sub: '이거 주세요, 맛있어요 등 12문장',
+    emoji: '\u{1F35C}',
+    words: RESTAURANT_SENTENCES,
+  },
+  {
+    id: 8,
+    name: '길찾기 회화',
+    sub: '화장실이 어디예요, 이쪽으로 가세요 등 12문장',
+    emoji: '\u{1F9ED}',
+    words: DIRECTIONS_SENTENCES,
+  },
+  {
+    id: 9,
+    name: '날씨 회화',
+    sub: '오늘 날씨 어때요, 더워요·추워요 등 10문장',
+    emoji: '\u{2600}\u{FE0F}',
+    words: WEATHER_SENTENCES,
+  },
+  {
+    id: 10,
+    name: '취미·여가 회화',
+    sub: '뭘 좋아해요, 저는 OO을 좋아해요 등 13문장',
+    emoji: '\u{26BD}',
+    words: HOBBY_SENTENCES,
+  },
+  {
+    id: 11,
+    name: '학교생활 회화',
+    sub: '숙제 있어요, 몇 학년이에요 등 12문장',
+    emoji: '\u{1F3EB}',
+    words: SCHOOL_SENTENCES,
+  },
+  {
+    id: 12,
+    name: '가족소개 회화',
+    sub: '가족이 몇 명이에요, 우리 가족 소개 등 12문장',
+    emoji: '\u{1F46A}',
+    words: FAMILY_SENTENCES,
   },
 ];
 
